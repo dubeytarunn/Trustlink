@@ -1,0 +1,31 @@
+{
+  "name": "trustlink",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TrustLink - University & Employer Academic Credential Verification Platform",
+  "workspaces": [
+    "server",
+    "client",
+    "e2e"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace=server run dev",
+    "dev:client": "npm --workspace=client run dev",
+    "dev": "npm --workspace=server run dev",
+    "build": "npm --workspace=server run build && npm --workspace=client run build",
+    "start": "npm --workspace=server run start",
+    "test": "npm --workspace=server run test",
+    "test:watch": "npm --workspace=server run test:watch",
+    "benchmark": "npm --workspace=server run benchmark",
+    "lint": "npm --workspace=server run lint",
+    "seed": "npm --workspace=server run seed"
+  },
+  "keywords": [
+    "credentials",
+    "ecdsa",
+    "verification",
+    "academic-integrity"
+  ],
+  "author": "Tarun Dubey (24BAI1523)",
+  "license": "UNLICENSED"
+}
