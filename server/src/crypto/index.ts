@@ -4,3 +4,4 @@ export * from './keys';
 export * from './commitments';
 export * from './sign-verify';
 export * from './hash-chain';
+export * from './w3c';

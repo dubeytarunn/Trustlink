@@ -22,10 +22,16 @@ export function runMigrations(db: Database.Database): void {
     for (const file of files) {
       if (!appliedSet.has(file)) {
         const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
-        db.transaction(() => {
-          db.exec(sql);
-          db.prepare('INSERT INTO schema_migrations (migration_name) VALUES (?)').run(file);
-        })();
+        try {
+          db.transaction(() => {
+            db.exec(sql);
+            db.prepare('INSERT OR IGNORE INTO schema_migrations (migration_name) VALUES (?)').run(file);
+          })();
+        } catch (err: any) {
+          if (!err.message?.includes('UNIQUE constraint failed')) {
+            throw err;
+          }
+        }
       }
     }
   }

@@ -5,6 +5,7 @@ import { SignedPayload, ClaimReveal, verifyClaimReveal } from './commitments';
 export type VerificationOutcome =
   | 'valid'
   | 'invalid'
+  | 'suspended'
   | 'revoked'
   | 'expired'
   | 'not_found'
@@ -58,15 +59,15 @@ export function verifySignature(payload: SignedPayload, signatureBase64Url: stri
  * Core Verification Algorithm (Section 3.5):
  * 1. Checks presented reveals against commitments in payload
  * 2. Checks signature over canonical(payload) using university's public key
- * 3. Evaluates lifecycle status (active, revoked, expired, issuer suspended)
+ * 3. Evaluates lifecycle status (active, valid, suspended, revoked, expired, issuer suspended)
  */
 export function verifyCredential(params: {
   payload: SignedPayload;
   signature: string;
   publicKeyPem: string;
   reveals: ClaimReveal[];
-  credentialStatus: 'active' | 'revoked';
-  issuerStatus: 'active' | 'suspended';
+  credentialStatus: 'active' | 'valid' | 'suspended' | 'revoked' | 'expired' | string;
+  issuerStatus: 'active' | 'suspended' | string;
   expiresAt?: string | null;
 }): VerificationDetails {
   const { payload, signature, publicKeyPem, reveals, credentialStatus, issuerStatus, expiresAt } = params;
@@ -127,6 +128,18 @@ export function verifyCredential(params: {
       commitmentsMatch: true,
       status: 'revoked',
       failureReason: 'Credential was revoked by issuing institution',
+    };
+  }
+
+  if (credentialStatus === 'suspended') {
+    return {
+      outcome: 'suspended',
+      isValid: false,
+      tamperedClaims: [],
+      signatureValid: true,
+      commitmentsMatch: true,
+      status: 'suspended',
+      failureReason: 'Credential has been temporarily suspended by issuing institution',
     };
   }
 

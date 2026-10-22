@@ -1,15 +1,81 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { Login } from './pages/Login';
+import { ClaimAccount } from './pages/ClaimAccount';
+import { Universities } from './pages/admin/Universities';
+import { AuditLog } from './pages/admin/AuditLog';
+import { TamperLab } from './pages/admin/TamperLab';
+import { UniversityDashboard } from './pages/university/UniversityDashboard';
+import { StudentDashboard } from './pages/StudentDashboard';
+import { VerifyCredential } from './pages/VerifyCredential';
+import { VerifyShare } from './pages/VerifyShare';
+import { Landing } from './pages/Landing';
+import { AadhaarKYC } from './pages/AadhaarKYC';
+import { EmployerDashboard } from './pages/employer/EmployerDashboard';
+
+import { ErrorBoundary } from './components/ErrorBoundary';
+
+/** Guard that redirects unauthenticated users to /login */
+function RequireRole({ role, children }: { role: string; children: JSX.Element }) {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950"><div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-500 border-t-transparent" /></div>;
+  if (!user || user.role !== role) return <Navigate to="/login" replace />;
+  return <ErrorBoundary fallbackTitle={`Protected ${role.toUpperCase()} Workspace Error`}>{children}</ErrorBoundary>;
+}
+
+/** Auto-redirect from /dashboard based on user role */
+function DashboardRedirect() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (user.role === 'admin') return <Navigate to="/admin/universities" replace />;
+  if (user.role === 'university') return <Navigate to="/university" replace />;
+  if (user.role === 'student') return <Navigate to="/student" replace />;
+  if (user.role === 'employer') return <Navigate to="/employer" replace />;
+  return <Navigate to="/login" replace />;
+}
+
 export default function App() {
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0B1B3A', color: '#F8FAFC' }}>
-      <div style={{ textAlign: 'center', maxWidth: '640px', padding: '2rem', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', background: 'rgba(255,255,255,0.04)' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: 800, margin: '0 0 1rem', color: '#10B981' }}>TrustLink</h1>
-        <p style={{ fontSize: '1.125rem', color: '#94A3B8', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-          University &amp; Employer Academic Credential Verification Platform
-        </p>
-        <div style={{ padding: '0.75rem 1.25rem', backgroundColor: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '8px', color: '#34D399', fontSize: '0.875rem' }}>
-          Phase 1 Foundation: Crypto Core &amp; Database Migrations Initialized
-        </div>
-      </div>
-    </div>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <ErrorBoundary fallbackTitle="Application Navigation Error">
+            <Routes>
+            {/* Public Landing & Verification */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/claim" element={<ClaimAccount />} />
+            <Route path="/kyc/aadhaar" element={<AadhaarKYC />} />
+            <Route path="/verify/credential/:credentialId" element={<VerifyCredential />} />
+            <Route path="/verify/share/:shareToken" element={<VerifyShare />} />
+
+            {/* Admin */}
+            <Route path="/admin/universities" element={<RequireRole role="admin"><Universities /></RequireRole>} />
+            <Route path="/admin/audit" element={<RequireRole role="admin"><AuditLog /></RequireRole>} />
+            <Route path="/admin/tamper" element={<RequireRole role="admin"><TamperLab /></RequireRole>} />
+
+            {/* University */}
+            <Route path="/university" element={<RequireRole role="university"><UniversityDashboard /></RequireRole>} />
+            <Route path="/university/*" element={<RequireRole role="university"><UniversityDashboard /></RequireRole>} />
+
+            {/* Student */}
+            <Route path="/student" element={<RequireRole role="student"><StudentDashboard /></RequireRole>} />
+            <Route path="/student/*" element={<RequireRole role="student"><StudentDashboard /></RequireRole>} />
+
+            {/* Employer */}
+            <Route path="/employer" element={<RequireRole role="employer"><EmployerDashboard /></RequireRole>} />
+            <Route path="/employer/verify" element={<RequireRole role="employer"><EmployerDashboard /></RequireRole>} />
+            <Route path="/employer/history" element={<RequireRole role="employer"><EmployerDashboard /></RequireRole>} />
+
+            {/* Default redirects */}
+            <Route path="/dashboard" element={<DashboardRedirect />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundary>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

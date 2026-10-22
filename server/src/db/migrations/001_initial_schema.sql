@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS credential_templates (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   university_id INTEGER NOT NULL REFERENCES universities(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-  type TEXT NOT NULL CHECK(type IN ('degree', 'transcript', 'certificate', 'course')),
+  type TEXT NOT NULL CHECK(type IN ('degree', 'transcript', 'certificate', 'course', 'skill', 'certification', 'internship', 'achievement', 'project', 'micro-credential')),
   claim_schema_json TEXT NOT NULL,
   employer_visible_claims_json TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
@@ -97,9 +97,11 @@ CREATE TABLE IF NOT EXISTS credentials (
   claims_json TEXT NOT NULL,
   salts_json TEXT NOT NULL,
   payload_hash TEXT NOT NULL,
-  status TEXT NOT NULL CHECK(status IN ('active', 'revoked')) DEFAULT 'active',
+  status TEXT NOT NULL CHECK(status IN ('active', 'valid', 'suspended', 'revoked', 'expired')) DEFAULT 'active',
   revoked_reason TEXT,
   revoked_at TEXT,
+  suspended_reason TEXT,
+  suspended_at TEXT,
   issued_at TEXT NOT NULL,
   expires_at TEXT
 );

@@ -1,11 +1,53 @@
+# Dependencies
 node_modules/
+*/node_modules/
+
+# Production build outputs
 dist/
+*/dist/
 build/
+*/build/
+
+# Environment configurations and secrets
 .env
+.env.local
+.env.*.local
+*.env
+!.env.example
+
+# SQLite Database and transient files
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+data/
+server/data/
+
+# Tesseract OCR caches & binary data
+*.traineddata
+server/eng.traineddata
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Performance & Load Testing Artifacts (JMeter, etc.)
+*.jtl
+jmeter.log
+report/
+test-results/
+
+# Test coverage
 coverage/
+*.lcov
+
+# IDE & OS files
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+Desktop.ini
