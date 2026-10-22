@@ -99,12 +99,12 @@ Every verification request runs seven independent checks:
 ```mermaid
 sequenceDiagram
     autonumber
-    actor University as University Registrar (Issuer)
-    actor Student as Student (Holder)
-    actor Employer as Employer / Verifier
+    actor University as University Registrar
+    actor Student as Student Holder
+    actor Employer as Employer Verifier
     participant Server as TrustLink Backend API
-    participant Crypto as Crypto Engine (ECDSA P-256)
-    participant DB as SQLite & Hash-Chain Audit Log
+    participant Crypto as Cryptographic Engine
+    participant DB as SQLite & Audit Ledger
 
     Note over University,DB: 1. Credential Issuance
     University->>Server: Submit Credential Claims (Name, Degree, GPA, Year)
@@ -114,18 +114,18 @@ sequenceDiagram
     Server->>DB: Store Credential & Log to Append-Only Hash Chain
     Server-->>University: Credential Issued & QR Code Generated
 
-    Note over Student,Server: 2. Selective Disclosure Share
-    Student->>Server: Select Disclosed Claims (e.g. Degree only; hide GPA)
+    Note over Student,Server: 2. Selective Disclosure Presentation
+    Student->>Server: Select claims to disclose (e.g. reveal Degree, hide GPA)
     Server->>Crypto: Generate Blinding Factors & Presentation Envelope
     Server->>DB: Store Share Token & Expiry
     Server-->>Student: Shareable URL & Presentation QR Code
 
     Note over Employer,DB: 3. Verification Audit
-    Employer->>Server: Request Verification (ID or Share Token)
+    Employer->>Server: Request Verification (via ID or Share Token)
     Server->>DB: Fetch Public Key, Status & Commitments
     Server->>Crypto: Execute 7-Point Verification Audit
     Server->>DB: Append Verification Attempt to SHA-256 Audit Log
-    Server-->>Employer: Audit Result (Valid / Compromised / Expired)
+    Server-->>Employer: Audit Result (Valid, Compromised, or Expired)
 ```
 
 ---
